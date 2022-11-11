@@ -9,6 +9,11 @@
     <Import_RootNamespace>IngameScript</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Class1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Config\Tags.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\Blocks\BlockConsumer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\Blocks\NamedBlockProvider.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debuggable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Script\Blocks\ConfigBlockProvider.cs" />
   </ItemGroup>
 </Project>

@@ -22,9 +22,10 @@ namespace IngameScript
 {
     partial class Program
     {
-        public class Class1
-        {
 
+        public interface IBlockConsumer
+        {
+            void ConsumeBlock(IMyTerminalBlock block);
         }
     }
 }
