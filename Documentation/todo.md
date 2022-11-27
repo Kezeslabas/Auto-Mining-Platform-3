@@ -18,7 +18,7 @@
 
 - It should use the built in Custom Data Config Handler solution of SE. See: [Link](https://github.com/malware-dev/MDK-SE/wiki/Handling-configuration-and-storage)
 - It should handle data so only the custom fields are maintained in the config.
-- It should be able to read data from teh Custom Data of the PB.
+- It should be able to read data from the Custom Data of the PB.
 - It should be able to initialize the custom data of the PB.
 
 ### State Saving

@@ -37,6 +37,7 @@ namespace IngameScript
 
             public void ParseAndRoute(string argument)
             {
+                Debugger.Log("Arg: " + argument);
                 if (string.IsNullOrEmpty(argument))
                 {
                     notification("No Argument Provided!");

@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Generic\Argument\Router.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\AutoRun\RunManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debugger.cs" />
   </ItemGroup>
 </Project>
