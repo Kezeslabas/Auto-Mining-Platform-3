@@ -6,125 +6,60 @@
  * top of your final script. You can safely delete this file if you do not want any such comments.
  */
 
-const bool DEBUG_ENABLED = true;
+readonly bool DEBUG_ENABLED = true;
 
-readonly Debugger debugger;
-readonly Config config;
-readonly ConfigBlockProvider blockProvider;
+readonly Debugger debugger = new Debugger();
 
 public Program()
 {
-    debugger = new Debugger(Echo, DEBUG_ENABLED);
+    Debugger.Log("Before Init");
 
-    config = new Config(debugger);
-    blockProvider = new ConfigBlockProvider(debugger, GetBlocksWithName, config, ImmutableList.Create<IBlockConsumer>());
+    Debugger.Init(DEBUG_ENABLED, Echo);
+
+    Debugger.Log("After Init");
 }
 
 public void Save()
 {
-
 }
 
 public void Main(string argument, UpdateType updateSource)
 {
-    blockProvider.LoadBlocks();
+    MyClass asd = new MyClass();
+    asd.DoStaff();
+}
+
+class MyClass
+{
+    public void DoStaff()
+    {
+        Debugger.Log("Inside Class");
+    }
 }
 
 public void GetBlocksWithName(string name, List<IMyTerminalBlock> blocks)
 {
-    GridTerminalSystem.SearchBlocksOfName(name, blocks);
-}
-
-
-public interface IBlockConsumer
-{
-    void ConsumeBlock(IMyTerminalBlock block);
-}
-
-
-public class ConfigBlockProvider : NamedBlockProvider
-{
-    private readonly IMainTagConfig mainTagConfig;
-
-    public ConfigBlockProvider(Debugger debugger, Action<string, List<IMyTerminalBlock>> loadBlocksAction, IMainTagConfig mainTagConfig, ImmutableList<IBlockConsumer> consumers)
-        : base(debugger, loadBlocksAction, consumers)
-    {
-        this.mainTagConfig = mainTagConfig;
-    }
-
-public void LoadBlocks()
-    {
-        LoadBlocks(mainTagConfig.MainTag);
-    }
-}
-
-public abstract class Debuggable
-{
-    protected readonly Debugger debugger;
-
-    protected Debuggable(Debugger debugger)
-    {
-        this.debugger = debugger;
-    }
+    GridTerminalSystem.GetBlocksOfType(blocks, block => block.CustomName.Contains(name));
 }
 
 public class Debugger
 {
-    private readonly bool DEBUG_ENABLED;
-    private Action<string> Echo;
+    private static Action<string> Echo = t => { return; };
 
-    public Debugger(Action<string> echo, bool debugEnabled)
+    public static void Init(bool enabled, Action<string> echo)
     {
-        Echo = echo;
-        DEBUG_ENABLED = debugEnabled;
-    }
-
-    public void Debug(string text)
-    {
-        if (DEBUG_ENABLED)
+        if (enabled)
         {
-            Echo(text);
+            Echo = echo;
+        }
+        else
+        {
+            Echo = t => { return; };
         }
     }
-}
 
-
-public class NamedBlockProvider : Debuggable
-{
-    private readonly Action<string, List<IMyTerminalBlock>> loadBlocksAction;
-    private readonly ImmutableList<IBlockConsumer> consumers;
-
-    private readonly List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-
-    public NamedBlockProvider(Debugger debugger, Action<string, List<IMyTerminalBlock>> loadBlocksAction, ImmutableList<IBlockConsumer> consumers) : base(debugger)
+    public static void Log(string text)
     {
-        this.loadBlocksAction = loadBlocksAction;
-        this.consumers = consumers;
+        Echo(text);
     }
-
-public void LoadBlocks(string name)
-    {
-        blocks.Clear();
-        loadBlocksAction.Invoke(name, blocks);
-
-        blocks.ForEach(block => {
-            consumers.ForEach(consumer => consumer.ConsumeBlock(block));
-        });
-
-        debugger.Debug("Blocks found: " + blocks.Count);
-    }
-}
-
-public interface IMainTagConfig
-{
-    string MainTag { get; }
-}
-
-public class Config : Debuggable, IMainTagConfig
-{
-    public Config(Debugger debugger) : base(debugger)
-    {
-    }
-
-    public string MainTag { get; private set; } = "/Mine 01/";
 }

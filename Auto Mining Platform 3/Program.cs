@@ -22,28 +22,35 @@ namespace IngameScript
 {
     partial class Program : MyGridProgram
     {
-        const bool DEBUG_ENABLED = true;
+        readonly bool DEBUG_ENABLED = true;
 
-        readonly Debugger debugger;
-        readonly Config config;
-        readonly ConfigBlockProvider blockProvider;
+        readonly Debugger debugger = new Debugger();
 
         public Program()
         {
-            debugger = new Debugger(Echo, DEBUG_ENABLED);
+            Debugger.Log("Before Init");
 
-            config = new Config(debugger);
-            blockProvider = new ConfigBlockProvider(debugger, GetBlocksWithName, config, ImmutableList.Create<IBlockConsumer>());
+            Debugger.Init(DEBUG_ENABLED, Echo);
+
+            Debugger.Log("After Init");
         }
 
         public void Save()
         {
-
         }
 
         public void Main(string argument, UpdateType updateSource)
         {
-            blockProvider.LoadBlocks();
+            MyClass asd = new MyClass();
+            asd.DoStaff();
+        }
+
+        class MyClass
+        {
+            public void DoStaff()
+            {
+                Debugger.Log("Inside Class");
+            }
         }
 
         /// <summary>
@@ -52,7 +59,7 @@ namespace IngameScript
         /// </summary>
         public void GetBlocksWithName(string name, List<IMyTerminalBlock> blocks)
         {
-            GridTerminalSystem.SearchBlocksOfName(name, blocks);
+            GridTerminalSystem.GetBlocksOfType(blocks, block => block.CustomName.Contains(name));
         }
     }
 }
