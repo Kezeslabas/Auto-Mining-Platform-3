@@ -1,14 +1,16 @@
-# Tasks to do with Descritions
+﻿# Tasks to do with Descritions
 
 ## Develop General Handlers
 
 ### Debugging
 
 - It shouldbe possible to write Debug Messages to the Detailed Info of the PB.
+	- Done
 
 ### Argument Handler
 
 - It should be able to read the argument of the PB, and choose the correct route based on it. See: [Link](https://github.com/malware-dev/MDK-SE/wiki/Handling-Script-Arguments)
+	- Done 
 - It should be able to trigger multiple routes with the same argument
 	- This should be customizable
 

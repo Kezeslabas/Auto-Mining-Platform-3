@@ -8,15 +8,15 @@
 
 readonly bool DEBUG_ENABLED = true;
 
-readonly Debugger debugger = new Debugger();
+readonly MyCommandLine CL = new MyCommandLine();
+readonly Router router;
 
 public Program()
 {
-    Debugger.Log("Before Init");
-
     Debugger.Init(DEBUG_ENABLED, Echo);
-
-    Debugger.Log("After Init");
+    router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>>{
+        { "test", p => Echo("Test") }
+    });
 }
 
 public void Save()
@@ -25,21 +25,7 @@ public void Save()
 
 public void Main(string argument, UpdateType updateSource)
 {
-    MyClass asd = new MyClass();
-    asd.DoStaff();
-}
-
-class MyClass
-{
-    public void DoStaff()
-    {
-        Debugger.Log("Inside Class");
-    }
-}
-
-public void GetBlocksWithName(string name, List<IMyTerminalBlock> blocks)
-{
-    GridTerminalSystem.GetBlocksOfType(blocks, block => block.CustomName.Contains(name));
+    router.ParseAndRoute(argument);
 }
 
 public class Debugger
@@ -61,5 +47,36 @@ public class Debugger
     public static void Log(string text)
     {
         Echo(text);
+    }
+}
+
+public class Router
+{
+    private readonly Action<string> notification;
+    private readonly Dictionary<string, Action<MyCommandLine>> routes;
+
+    private readonly MyCommandLine cl = new MyCommandLine();
+
+    public Router(Action<string> notification, Dictionary<string, Action<MyCommandLine>> routes)
+    {
+        this.notification = notification;
+        this.routes = routes;
+    }
+
+    public void ParseAndRoute(string argument)
+    {
+        if (string.IsNullOrEmpty(argument))
+        {
+            notification("No Argument Provided!");
+        }
+        else if (cl.TryParse(argument))
+        {
+            routes.GetValueOrDefault(cl.Argument(0), p => notification("Argument not found: " + argument))
+                .Invoke(cl);
+        }
+        else
+        {
+            notification("Argument can't be parse: " + argument);
+        }
     }
 }

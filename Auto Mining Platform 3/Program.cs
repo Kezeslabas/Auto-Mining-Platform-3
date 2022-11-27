@@ -24,15 +24,15 @@ namespace IngameScript
     {
         readonly bool DEBUG_ENABLED = true;
 
-        readonly Debugger debugger = new Debugger();
+        readonly MyCommandLine CL = new MyCommandLine();
+        readonly Router router;
 
         public Program()
         {
-            Debugger.Log("Before Init");
-
             Debugger.Init(DEBUG_ENABLED, Echo);
-
-            Debugger.Log("After Init");
+            router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>>{
+                { "test", p => Echo("Test") }
+            });
         }
 
         public void Save()
@@ -41,25 +41,7 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
-            MyClass asd = new MyClass();
-            asd.DoStaff();
-        }
-
-        class MyClass
-        {
-            public void DoStaff()
-            {
-                Debugger.Log("Inside Class");
-            }
-        }
-
-        /// <summary>
-        /// Wrapper around <see cref="IMyGridTerminalSystem.SearchBlocksOfName(string, List{IMyTerminalBlock}, Func{IMyTerminalBlock, bool})"/>,
-        /// to access all blocks with the provided name.
-        /// </summary>
-        public void GetBlocksWithName(string name, List<IMyTerminalBlock> blocks)
-        {
-            GridTerminalSystem.GetBlocksOfType(blocks, block => block.CustomName.Contains(name));
+            router.ParseAndRoute(argument);   
         }
     }
 }

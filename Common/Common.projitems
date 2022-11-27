@@ -9,6 +9,7 @@
     <Import_RootNamespace>IngameScript</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\Argument\Router.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debugger.cs" />
   </ItemGroup>
 </Project>
