@@ -73,7 +73,7 @@ namespace IngameScript
             Echo(indicator ? "[/-/-/-]" : "[-/-/-/]");
             indicator = !indicator;
 
-            Echo("Start Arg: " + argument);
+            //Echo("Start Arg: " + argument);
             Echo("Main Source: " + updateSource);
 
             runManager.AnalyzeUpdateType(updateSource);
@@ -90,11 +90,11 @@ namespace IngameScript
 
             Echo("Run1: " + run1);
             Echo("Run1T: " + run1Target);
-            Echo("Run10: " + run10);
-            Echo("Run10T: " + run10Target);
-            Echo("Run100: " + run100);
-            Echo("Run100T: " + run100Target);
-            Echo("Paused: " + runManager.Paused);
+            //Echo("Run10: " + run10);
+            //Echo("Run10T: " + run10Target);
+            //Echo("Run100: " + run100);
+            //Echo("Run100T: " + run100Target);
+            //Echo("Paused: " + runManager.Paused);
 
             runManager.ApplySchedule();
         }

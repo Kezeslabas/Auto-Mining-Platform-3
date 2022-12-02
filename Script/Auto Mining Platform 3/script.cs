@@ -57,7 +57,6 @@ public void Main(string argument, UpdateType updateSource)
     Echo(indicator ? "[/-/-/-]" : "[-/-/-/]");
     indicator = !indicator;
 
-    Echo("Start Arg: " + argument);
     Echo("Main Source: " + updateSource);
 
     runManager.AnalyzeUpdateType(updateSource);
@@ -74,11 +73,6 @@ public void Main(string argument, UpdateType updateSource)
 
     Echo("Run1: " + run1);
     Echo("Run1T: " + run1Target);
-    Echo("Run10: " + run10);
-    Echo("Run10T: " + run10Target);
-    Echo("Run100: " + run100);
-    Echo("Run100T: " + run100Target);
-    Echo("Paused: " + runManager.Paused);
 
     runManager.ApplySchedule();
 }
@@ -168,6 +162,11 @@ public class RunManager : IRunScheduler
     private byte weigth1to10 = 0;
     private byte weigth10to100 = 0;
 
+
+    bool was1 = false;
+    bool was10 = false;
+    bool was100 = false;
+
     public bool Paused { get; set; }
     private UpdateFrequency scheduledFrequency = UpdateFrequency.None;
     private UpdateFrequency currentFrequency = UpdateFrequency.None;
@@ -188,14 +187,14 @@ public class RunManager : IRunScheduler
 
         if (updateType.HasFlag(UpdateType.Update1))
         {
-            Debugger.Log("Is1");
+            was1 = true;
             weigth1to10++;
             currentFrequency |= UpdateFrequency.Update1;
         }
 
         if (updateType.HasFlag(UpdateType.Update10) || weigth1to10 >= 10)
         {
-            Debugger.Log("Is10");
+            was10 = true;
             weigth1to10 = 0;
             weigth10to100++;
             currentFrequency |= UpdateFrequency.Update10;
@@ -204,17 +203,17 @@ public class RunManager : IRunScheduler
         if (updateType.HasFlag(UpdateType.Update100) || weigth10to100 >= 10)
         {
             weigth10to100 = 0;
-            Debugger.Log("Is100");
+            was100 = true;
             currentFrequency |= UpdateFrequency.Update100;
         }
 
         if (updateType.HasFlag(UpdateType.Once))
         {
             weigth1to10++;
-            Debugger.Log("IsOnce");
             currentFrequency |= UpdateFrequency.Once;
         }
 
+        Debugger.Log("|1: " + was1 + " |10: " + was10 + " |100: " + was100);
         Debugger.Log("Analyzed As: " + currentFrequency);
     }
 
@@ -238,9 +237,7 @@ public class RunManager : IRunScheduler
 
     public bool IsAutoRun()
     {
-        Debugger.Log("CurrentFreq: " + currentFrequency);
-        Debugger.Log("NoFreq: " + UpdateFrequency.None);
-        return currentFrequency > UpdateFrequency.None;
+        return currentFrequency != UpdateFrequency.None;
     }
 
     public void ApplySchedule()
@@ -252,12 +249,8 @@ public class RunManager : IRunScheduler
         else
         {
             runtime.UpdateFrequency = scheduledFrequency;
-            Debugger.Log("Pre-End Actual Freq: " + runtime.UpdateFrequency);
-            Debugger.Log("Pre-End Scheduled: " + (int)scheduledFrequency);
             scheduledFrequency = UpdateFrequency.None;
         }
 
-        Debugger.Log("End Scheduled: " + scheduledFrequency);
-        Debugger.Log("End Actual Freq: " + (int)runtime.UpdateFrequency);
     }
 }

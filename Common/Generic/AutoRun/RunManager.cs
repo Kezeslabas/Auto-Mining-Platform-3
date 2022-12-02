@@ -1,115 +1,181 @@
-﻿using Sandbox.Game.EntityComponents;
-using Sandbox.ModAPI.Ingame;
-using Sandbox.ModAPI.Interfaces;
-using SpaceEngineers.Game.ModAPI.Ingame;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using Sandbox.ModAPI.Ingame;
 using System.Linq;
-using System.Text;
-using VRage;
-using VRage.Collections;
-using VRage.Game;
-using VRage.Game.Components;
-using VRage.Game.GUI.TextPanel;
-using VRage.Game.ModAPI.Ingame;
-using VRage.Game.ModAPI.Ingame.Utilities;
-using VRage.Game.ObjectBuilders.Definitions;
-using VRageMath;
 
 namespace IngameScript
 {
     partial class Program
     {
+        /// <summary>
+        /// Gives access to check for the currently active frequencies,
+        /// and to shedule a new frequency.
+        /// </summary>
         public interface IRunScheduler
         {
+            /// <summary>
+            ///  Check if the provided frequency is amongst the currently evaluated frequencies.
+            /// </summary>
+            /// <param name="frequency">Frequency to check for.</param>
+            /// <returns>True when frequency is matched, false otherwise.</returns>
             bool CheckForFrequency(UpdateFrequency frequency);
+
+            /// <summary>
+            ///  Check if any of the provided frequencies are amongst the currently evaluated frequencies.
+            /// </summary>
+            /// <param name="frequencies">Frequencies to check for.</param>
+            /// <returns>True when any of the frequencies are matched, false otherwise.</returns>
             bool CheckForFrequency(params UpdateFrequency[] frequencies);
+
+            /// <summary>
+            /// Add the provided frequency to the schedule.
+            /// </summary>
+            /// <param name="frequency">Frequency to schedule.</param>
             void ScheduleRunFrequency(UpdateFrequency frequency);
         }
 
+        /// <summary>
+        /// Handles the automatic running of the PB.
+        /// <para/>
+        /// By calling the <see cref="AnalyzeUpdateType(UpdateType)"/> at the beginning of the main method, 
+        /// the currently running frequency is evaulated, and it can be checked for specific frequencies 
+        /// trough the <see cref="IRunScheduler"/> inteface.
+        /// <para/>
+        /// Using the <see cref="IRunScheduler"/> interface new schedules can be added
+        /// as <see cref="UpdateFrequency"/>, and it can be applied to the PB 
+        /// if <see cref="ApplySchedule"/> is called at the end of the main method.
+        /// <para/>
+        /// As of now, during an automatic run, only one <see cref="UpdateType"/> 
+        /// is passed to the PB by the game, and it's always represent's the highest frequency.
+        /// This is handled internally by this class. 
+        /// Higher frequencies also evaluate to lower frequencies,
+        /// when the appropriate number of runs were achieved relative to each other.
+        /// </summary>
         public class RunManager : IRunScheduler
         {
             private readonly IMyGridProgramRuntimeInfo runtime;
-            private byte weigth1to10 = 0;
-            private byte weigth10to100 = 0;
 
-            public bool Paused { get; set; }
-            private UpdateFrequency scheduledFrequency = UpdateFrequency.None;
-            private UpdateFrequency currentFrequency = UpdateFrequency.None;
+            /// <summary>
+            /// The number of times <see cref="UpdateFrequency.Update1"/> or <see cref="UpdateFrequency.Once"/>
+            /// was evaluated relative to <see cref="UpdateFrequency.Update10"/>
+            /// <para/>
+            /// When <see cref="UpdateFrequency.Update10"/> is evaluated, it resets to 0.
+            /// </summary>
+            private byte weightOf1 = 0;
 
+            /// <summary>
+            /// The number of times <see cref="UpdateFrequency.Update10"/> 
+            /// was evaluated relative to <see cref="UpdateFrequency.Update100"/>
+            /// <para/>
+            /// When <see cref="UpdateFrequency.Update10"/> is evaluated, it resets to 0.
+            /// </summary>
+            private byte weightOf10 = 0;
+
+            /// <summary>
+            /// By setting this flag the automatic running can be disabled/enabled.
+            /// The previously scheduled frequencies are not lost.
+            /// </summary>
+            public bool Paused { get; set; } = false;
+
+            /// <summary>
+            /// The combination of currently scheduled frequencies.
+            /// </summary>
+            public UpdateFrequency ScheduledFrequency { get; private set; } = UpdateFrequency.None;
+
+            /// <summary>
+            /// The combination of the last evaluated frequencies.
+            /// </summary>
+            public UpdateFrequency CurrentFrequency { get; private set; } = UpdateFrequency.None;
+
+            /// <summary>
+            /// New instance with the injected Runtime.
+            /// </summary>
+            /// <param name="runtime">Runtime to apply the schedule to.</param>
             public RunManager(IMyGridProgramRuntimeInfo runtime)
             {
                 this.runtime = runtime;
             }
 
-            public void AnalyzeUpdateType(UpdateType updateType)
+            /// <summary>
+            /// Checks the provided <see cref="UpdateType"/> and derives which <see cref="UpdateFrequency"/>
+            /// it can be associated with.
+            /// <br/>
+            /// If none, then it's interpreted as <see cref="UpdateFrequency.None"/>.
+            /// </summary>
+            /// <param name="updateType">The type to analyze.</param>
+            /// <returns>The evaluated frequencies.</returns>
+            public UpdateFrequency AnalyzeUpdateType(UpdateType updateType)
             {
+                CurrentFrequency = UpdateFrequency.None;
+
+                //Just to improve performance, as when paused then no automatic run is allowed.
                 if (Paused)
                 {
-                    return;
-                }
-
-                currentFrequency = UpdateFrequency.None;
-
-                if (updateType.HasFlag(UpdateType.Update1))
-                {
-                    Debugger.Log("Is1");
-                    weigth1to10++;
-                    currentFrequency |= UpdateFrequency.Update1;
-                }
-
-                if (updateType.HasFlag(UpdateType.Update10) || weigth1to10 >= 10)
-                {
-                    Debugger.Log("Is10");
-                    weigth1to10 = 0;
-                    weigth10to100++;
-                    currentFrequency |= UpdateFrequency.Update10;
-                }
-
-                if (updateType.HasFlag(UpdateType.Update100) || weigth10to100 >= 10)
-                {
-                    weigth10to100 = 0;
-                    Debugger.Log("Is100");
-                    currentFrequency |= UpdateFrequency.Update100;
+                    return CurrentFrequency;
                 }
 
                 if (updateType.HasFlag(UpdateType.Once))
                 {
-                    weigth1to10++;
-                    Debugger.Log("IsOnce");
-                    currentFrequency |= UpdateFrequency.Once;
+                    CurrentFrequency |= UpdateFrequency.Once;
+                    weightOf1++;
                 }
 
-                Debugger.Log("Analyzed As: " + currentFrequency);
+                if (updateType.HasFlag(UpdateType.Update1))
+                {
+                    CurrentFrequency |= UpdateFrequency.Update1;
+                    weightOf1++;
+                }
+
+                if (weightOf1 >= 10 || updateType.HasFlag(UpdateType.Update10))
+                {
+                    CurrentFrequency |= UpdateFrequency.Update10;
+                    weightOf1 = 0;
+                    weightOf10++;
+                }
+
+                if (weightOf10 >= 10 || updateType.HasFlag(UpdateType.Update100))
+                {
+                    CurrentFrequency |= UpdateFrequency.Update100;
+                    weightOf10 = 0;
+                }
+
+                return CurrentFrequency;
             }
 
+            /// <inheritdoc/>
             public bool CheckForFrequency(UpdateFrequency frequency)
             {
-                return currentFrequency.HasFlag(frequency);
+                return CurrentFrequency.HasFlag(frequency);
             }
 
+            /// <inheritdoc/>
             public bool CheckForFrequency(params UpdateFrequency[] frequencies)
             {
-                return frequencies.Any(frequency => currentFrequency.HasFlag(frequency));
+                return frequencies.Any(frequency => CheckForFrequency(frequency));
             }
 
+            /// <inheritdoc/>
             public void ScheduleRunFrequency(UpdateFrequency frequency)
             {
-                if (!scheduledFrequency.HasFlag(frequency))
+                if (!ScheduledFrequency.HasFlag(frequency))
                 {
-                    scheduledFrequency |= frequency;
+                    ScheduledFrequency |= frequency;
                 }
             }
 
+            /// <summary>
+            /// Check if the currently evaulated frequencies represent an automatic run or not.
+            /// </summary>
+            /// <returns>True if it's an automatic run, false otherwise.</returns>
             public bool IsAutoRun()
             {
-                Debugger.Log("CurrentFreq: " + currentFrequency);
-                Debugger.Log("NoFreq: " + UpdateFrequency.None);
-                return currentFrequency > UpdateFrequency.None;
+                return CurrentFrequency != UpdateFrequency.None;
             }
 
+            /// <summary>
+            /// Applies the schedule frequency to the Runtime, then clears the schedule.
+            /// <para/>
+            /// When <see cref="Paused"/> is true, then <see cref="UpdateFrequency.None"/> is applied instead,
+            /// and the schedule is kept.
+            /// </summary>
             public void ApplySchedule()
             {
                 if (Paused)
@@ -118,14 +184,9 @@ namespace IngameScript
                 }
                 else
                 {
-                    runtime.UpdateFrequency = scheduledFrequency;
-                    Debugger.Log("Pre-End Actual Freq: " + runtime.UpdateFrequency);
-                    Debugger.Log("Pre-End Scheduled: " + (int)scheduledFrequency);
-                    scheduledFrequency = UpdateFrequency.None;
+                    runtime.UpdateFrequency = ScheduledFrequency;
+                    ScheduledFrequency = UpdateFrequency.None;
                 }
-
-                Debugger.Log("End Scheduled: " + scheduledFrequency);
-                Debugger.Log("End Actual Freq: " + (int)runtime.UpdateFrequency);
             }
         }
     }
