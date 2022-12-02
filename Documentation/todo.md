@@ -29,8 +29,11 @@
 ### Automatic Running
 
 - It should be able to schedule an automatic run at any frequency. (Including NONE) See: [Link](https://github.com/malware-dev/MDK-SE/wiki/Continuous-Running-No-Timers-Needed)
+	- Done
 - Multiple frequencies might be scheduled at the same time.
+	- Done
 - It should be able to detect which frequencies triggered the actual run.
+	- Done
 
 ### Screen Message Handler
 

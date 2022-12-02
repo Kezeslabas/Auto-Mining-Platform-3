@@ -22,34 +22,50 @@ namespace IngameScript
 {
     partial class Program
     {
+        /// <summary>
+        /// Maintains different argument routes and uses <see cref="MyCommandLine"/> 
+        /// to parse the argument and select the correct route.
+        /// </summary>
         public class Router
         {
             private readonly Action<string> notification;
             private readonly Dictionary<string, Action<MyCommandLine>> routes;
 
-            private readonly MyCommandLine cl = new MyCommandLine();
+            private readonly MyCommandLine _cl = new MyCommandLine();
 
+            /// <summary>
+            /// New Router Instance.
+            /// </summary>
+            /// <param name="notification">Action to use to notify the user about argument errors.</param>
+            /// <param name="routes">Routes to use</param>
             public Router(Action<string> notification, Dictionary<string, Action<MyCommandLine>> routes)
             {
                 this.notification = notification;
                 this.routes = routes;
             }
 
-            public void ParseAndRoute(string argument)
+            /// <summary>
+            /// Parse the provided argument and find the corresponding route.
+            /// </summary>
+            /// <param name="argument">If the arguement was succesfully parsed, and a route was found, then true, otherwise false.</param>
+            public bool ParseAndRoute(string argument)
             {
                 Debugger.Log("Arg: " + argument);
                 if (string.IsNullOrEmpty(argument))
                 {
                     notification("No Argument Provided!");
+                    return false;
                 }
-                else if (cl.TryParse(argument))
+                else if (_cl.TryParse(argument))
                 {
-                    routes.GetValueOrDefault(cl.Argument(0), p => notification("Argument not found: " + argument))
-                        .Invoke(cl);
+                    routes.GetValueOrDefault(_cl.Argument(0), p => notification("Argument not found: " + argument))
+                        .Invoke(_cl);
+                    return true;
                 }
                 else
                 {
                     notification("Argument can't be parse: " + argument);
+                    return false;
                 }
             }
         }
