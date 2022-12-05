@@ -70,52 +70,33 @@ namespace IngameScript
 
         public void Main(string argument, UpdateType updateSource)
         {
+
             Echo(indicator ? "[/-/-/-]" : "[-/-/-/]");
             indicator = !indicator;
 
-            //Echo("Start Arg: " + argument);
-            Echo("Main Source: " + updateSource);
-
             runManager.AnalyzeUpdateType(updateSource);
+
             if (runManager.IsAutoRun())
             {
-                run1 = CheckTarget(run1, run1Target, UpdateFrequency.Update1);
-                run10 = CheckTarget(run10, run10Target, UpdateFrequency.Update10);
-                run100 = CheckTarget(run100, run100Target, UpdateFrequency.Update100);
+                //DoSomething
             }
             else
             {
                 router.ParseAndRoute(argument);
             }
 
-            Echo("Run1: " + run1);
-            Echo("Run1T: " + run1Target);
-            //Echo("Run10: " + run10);
-            //Echo("Run10T: " + run10Target);
-            //Echo("Run100: " + run100);
-            //Echo("Run100T: " + run100Target);
-            //Echo("Paused: " + runManager.Paused);
 
             runManager.ApplySchedule();
         }
 
-        public int CheckTarget(int num, int numTarget, UpdateFrequency frequency)
+        public void SaveToStorage(string storageString)
         {
-            if (runManager.CheckForFrequency(frequency))
-            {
-                if (num < numTarget)
-                {
-                    num++;
-                    runManager.ScheduleRunFrequency(frequency);
-                }
-                else
-                {
-                    runManager.ScheduleRunFrequency(UpdateFrequency.None);
-                }
-            }
-
-            return num;
+            Storage = storageString;
         }
 
+        public string LoadFromStorage()
+        {
+            return Storage;
+        }
     }
 }

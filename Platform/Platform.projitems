@@ -9,9 +9,9 @@
     <Import_RootNamespace>IngameScript</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Generic\Argument\Router.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Generic\AutoRun\RunManager.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debugger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Generic\State\IndexState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)State\PlatformState.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)State\" />
   </ItemGroup>
 </Project>

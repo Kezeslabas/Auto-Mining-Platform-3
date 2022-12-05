@@ -122,6 +122,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\Common\Common.projitems" Label="Shared" />
+  <Import Project="..\Platform\Platform.projitems" Label="Shared" />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
