@@ -22,73 +22,51 @@ namespace IngameScript
 {
     partial class Program
     {
-
-        public interface IState
-        {
-            void parseAndSet(string valueString);
-            string ToState();
-        }
-
-        public class Int32State : IState
-        {
-            public Int32 Value;
-
-            public void parseAndSet(string valueString)
-            {
-                Int32.TryParse(valueString, out Value);
-            }
-
-            public string ToState()
-            {
-                return "" + Value;
-            }
-        }
-
         /// <summary>
         /// <b>Experimental, use with caution.</b>
         /// <para/>
-        /// Uses an array and stores the values as string separated by a ';' in the Storage String.
+        /// Uses an array and stores the values as string separated by a ';' using the provided getters/setters
         /// </summary>
-        public abstract class StateManager
+        public abstract class IndexStateManager
         {
             private readonly int origianlStateVersion;
             private readonly Int32State stateVersion;
             private readonly IState[] states;
-            private readonly Action<string> setStorage;
-            private readonly Func<string> getStorage;
+            private readonly Action<string> setStateString;
+            private readonly Func<string> getStateString;
 
-            public StateManager(Action<string> setStorage, Func<string> getStorage, int origianlStateVersion, IState[] states)
+            public IndexStateManager(Action<string> setStateString, Func<string> getStateString, int origianlStateVersion, IState[] states)
             {
                 this.origianlStateVersion = origianlStateVersion;
                 stateVersion = new Int32State() { Value = origianlStateVersion };
 
-                this.setStorage = setStorage;
-                this.getStorage = getStorage;
+                this.setStateString = setStateString;
+                this.getStateString = getStateString;
 
                 this.states = new IState[] { stateVersion }.Concat(states).ToArray();
             }
 
             public void SaveStates()
             {
-                setStorage.Invoke(string.Join(";", states.Select(p => p.ToState())));   
+                setStateString.Invoke(string.Join(";", states.Select(p => p.ToState())));   
             }
 
             public void LoadStates()
             {
-                string[] stateStrings = getStorage.Invoke().Split(';');
+                string[] stateStrings = getStateString.Invoke().Split(';');
 
                 if(stateStrings.Length == 0)
                 {
                     return;
                 }
 
-                stateVersion.parseAndSet(stateStrings[0]);
+                stateVersion.ParseAndSet(stateStrings[0]);
 
                 if(stateVersion.Value == origianlStateVersion)
                 {
                     for (int i = 1; i < stateStrings.Length; i++)
                     {
-                        states[i].parseAndSet(stateStrings[i]);
+                        states[i].ParseAndSet(stateStrings[i]);
                     }
 
                     return;

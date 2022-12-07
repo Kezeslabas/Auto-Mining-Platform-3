@@ -50,7 +50,7 @@ namespace IngameScript
             /// <param name="argument">If the arguement was succesfully parsed, and a route was found, then true, otherwise false.</param>
             public bool ParseAndRoute(string argument)
             {
-                Debugger.Log("Arg: " + argument);
+                Debugger.Debug("Arg: " + argument);
                 if (string.IsNullOrEmpty(argument))
                 {
                     notification("No Argument Provided!");
