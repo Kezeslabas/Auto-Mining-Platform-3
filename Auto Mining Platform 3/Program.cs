@@ -27,14 +27,10 @@ namespace IngameScript
         readonly Router router;
         readonly RunManager runManager;
 
-        bool indicator = false;
+        readonly PlatformConfig config;
+        readonly IniStateManager configManager;
 
-        int run1 = 0;
-        int run1Target = 0;
-        int run10 = 0;
-        int run10Target = 0;
-        int run100 = 0;
-        int run100Target = 0;
+        bool indicator = false;
 
         public Program()
         {
@@ -42,30 +38,23 @@ namespace IngameScript
 
             runManager = new RunManager(Runtime);
 
+            config = new PlatformConfig();
+            configManager = new PartialCustomDataIniStateManager(SaveConfig, LoadConfig, config.StatesToImmutableDictionary());
+
             router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>>(){
                 { "test", p => Echo("Test") },
-                { "run1", p => {
-                    int.TryParse(p.Argument(1), out run1Target);
-                    runManager.ScheduleRunFrequency(UpdateFrequency.Update1);
-                }},
-                { "run10", p => {
-                    int.TryParse(p.Argument(1), out run10Target);
-                    runManager.ScheduleRunFrequency(UpdateFrequency.Update10);
-                }},
-                { "run100", p => {
-                    int.TryParse(p.Argument(1), out run100Target);
-                    runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
-                }},
                 { "pause", p => { runManager.Paused = true; }},
                 { "start", p => { runManager.Paused = false; }},
-                { "reset1", p => { run1 = 0; run1Target = 0; }},
-                { "reset10", p => { run10 = 0; run10Target = 0; }},
-                { "reset100", p => { run100 = 0; run100Target = 0; }}
+                { "load", p => { configManager.LoadStates(); }}
             });
+
+            configManager.SaveStates();
+            configManager.LoadStates();
         }
 
         public void Save()
         {
+
         }
 
         public void Main(string argument, UpdateType updateSource)
@@ -85,18 +74,16 @@ namespace IngameScript
                 router.ParseAndRoute(argument);
             }
 
-
+            Debugger.Debug(config.MainTag.Value);
             runManager.ApplySchedule();
         }
 
-        public void SaveToStorage(string storageString)
-        {
-            Storage = storageString;
-        }
+        public void SaveConfig(string customData) => Me.CustomData = customData;
 
-        public string LoadFromStorage()
-        {
-            return Storage;
-        }
+        public string LoadConfig() => Me.CustomData;
+
+        public void SaveToStorage(string storageString) => Storage = storageString;
+
+        public string LoadFromStorage() => Storage;
     }
 }

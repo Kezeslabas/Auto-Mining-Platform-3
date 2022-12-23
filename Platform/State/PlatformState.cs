@@ -21,10 +21,14 @@ using VRageMath;
 namespace IngameScript
 {
     partial class Program
-    {
-        public class PlatforState
-        {
+    { 
 
+        public class PlatformState
+        {
+            public IniState[] StatesToArray()
+            {
+                return new IniState[]{};
+            }
         }
     }
 }
