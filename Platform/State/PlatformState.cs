@@ -27,7 +27,7 @@ namespace IngameScript
         {
             public const string DEFAULT_SECTION = "PlatformState";
 
-            public IniState IsRunning = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
+            public TypedIniState<bool> IsRunning = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
 
             public IniState[] StatesToArray()
             {

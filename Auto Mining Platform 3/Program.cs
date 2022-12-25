@@ -54,18 +54,27 @@ namespace IngameScript
                 { "test", p => Echo("Test") },
                 { "load", p => { configManager.LoadStates(); }},
                 { "start", p => 
-                { 
+                {
+                    state.IsRunning.Value = true;
                     runManager.Paused = false;
                     runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
                 }},
                 { "stop", p =>
                 {
+                    state.IsRunning.Value = false;
                     runManager.Paused = false;
                     runManager.ScheduleRunFrequency(UpdateFrequency.None);
                 }},
                 { "pause", p => { runManager.Paused = true; }},
                 
             });
+
+            Debugger.Debug("Prog: " + state.IsRunning.Value);
+            if (state.IsRunning.Value)
+            {
+                runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
+                runManager.ApplySchedule();
+            }
         }
 
         public void Save()
@@ -83,14 +92,14 @@ namespace IngameScript
 
             if (runManager.IsAutoRun())
             {
-                //DoSomething
+                runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
             }
             else
             {
                 router.ParseAndRoute(argument);
             }
 
-            Debugger.Debug(config.MainTag.Value);
+            Debugger.Debug(state.IsRunning.Value.ToString());
             runManager.ApplySchedule();
         }
 
