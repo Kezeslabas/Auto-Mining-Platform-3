@@ -22,6 +22,7 @@ namespace IngameScript
 {
     partial class Program
     {
+
         /// <summary>
         /// Basic State template that uses a <see cref="MyIniKey"/> with the default section of [X].
         /// It also expects a <see cref="MyIni"/> that can be used to acquire the value.
@@ -87,7 +88,7 @@ namespace IngameScript
             private readonly StateValueExtractor valueExtractor;
             
 
-            public TypedIniState(string section, string label, T defaultValue, StateValueExtractor valueExtractor) : base(section, label)
+            protected TypedIniState(string section, string label, T defaultValue, StateValueExtractor valueExtractor) : base(section, label)
             {
                 DefaultValue = defaultValue;
                 Value = defaultValue;
@@ -99,7 +100,7 @@ namespace IngameScript
             /// <para/>
             /// If the state is in the provided ini, then the value will be updated, otherwise the default value is used.
             /// <para/>
-            /// When the value can't be parsed form the ini, then a warning is logged.
+            /// When the value can't be parsed from the ini, then a warning is logged.
             /// </summary>
             /// <param name="ini">The ini to check the state for.</param>
             public override void ParseAndSet(MyIni ini)
@@ -136,7 +137,7 @@ namespace IngameScript
                 return new KeyValuePair<MyIniKey, IniState>(GetIniKey(), this);
             }
 
-            private static bool BoolExtractor(MyIniValue p, out bool k) => p.TryGetBoolean(out k);
+            protected static bool BoolExtractor(MyIniValue p, out bool k) => p.TryGetBoolean(out k);
 
             /// <summary>
             /// Creates a <see cref="bool"/> based State.
@@ -144,15 +145,12 @@ namespace IngameScript
             /// <param name="label">The label of the state.</param>
             /// <param name="defaultValue">The default value to use.</param>
             /// <returns>New instance.</returns>
-            public static TypedIniState<bool> OfBool(string section, string label, bool defaultValue, Func<bool, bool> validator = null, string validationFailedMessage = null)
+            public static TypedIniState<bool> OfBool(string section, string label, bool defaultValue)
             {
-
-                return validator == null ?
-                    new TypedIniState<bool>(section, label, defaultValue, BoolExtractor) : 
-                    new ValidatedTypedIniState<bool>(section, label, defaultValue, BoolExtractor, validator, validationFailedMessage);
+                return new TypedIniState<bool>(section, label, defaultValue, BoolExtractor);
             }
 
-            private static bool IntExtractor(MyIniValue p, out int k) => p.TryGetInt32(out k);
+            protected static bool IntExtractor(MyIniValue p, out int k) => p.TryGetInt32(out k);
 
             /// <summary>
             /// Creates a <see cref="int"/> based State.
@@ -160,14 +158,12 @@ namespace IngameScript
             /// <param name="label">The label of the state.</param>
             /// <param name="defaultValue">The default value to use.</param>
             /// <returns>New instance.</returns>
-            public static TypedIniState<int> OfInt(string section, string label, int defaultValue, Func<int, bool> validator = null, string validationFailedMessage = null)
+            public static TypedIniState<int> OfInt(string section, string label, int defaultValue)
             {
-                return validator == null ? 
-                    new TypedIniState<int>(section, label, defaultValue, IntExtractor) :
-                    new ValidatedTypedIniState<int>(section, label, defaultValue, IntExtractor, validator, validationFailedMessage);
+                return new TypedIniState<int>(section, label, defaultValue, IntExtractor);
             }
 
-            private static bool StringExtractor(MyIniValue p, out string k) => p.TryGetString(out k);
+            protected static bool StringExtractor(MyIniValue p, out string k) => p.TryGetString(out k);
 
             /// <summary>
             /// Creates a <see cref="string"/> based State.
@@ -175,20 +171,24 @@ namespace IngameScript
             /// <param name="label">The label of the state.</param>
             /// <param name="defaultValue">The default value to use.</param>
             /// <returns>New instance.</returns>
-            public static TypedIniState<string> OfString(string section, string label, string defaultValue, Func<string, bool> validator = null, string validationFailedMessage = null)
+            public static TypedIniState<string> OfString(string section, string label, string defaultValue)
             {
-                return validator == null ? 
-                    new TypedIniState<string>(section, label, defaultValue, StringExtractor) :
-                    new ValidatedTypedIniState<string>(section, label, defaultValue, StringExtractor, validator, validationFailedMessage);
+                return new TypedIniState<string>(section, label, defaultValue, StringExtractor);
             }
         }
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// <para/>
+        /// It also validates the value after parsing, and logs a message if it fails the validation.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public class ValidatedTypedIniState<T> : TypedIniState<T>
         {
             private readonly Func<T, bool> validator;
             private readonly string validationFailedMessage;
 
-            public ValidatedTypedIniState(string section, string label, T defaultValue, StateValueExtractor valueExtractor, Func<T, bool> validator, string validationFailedMessage) : base(section, label, defaultValue, valueExtractor)
+            protected ValidatedTypedIniState(string section, string label, T defaultValue, StateValueExtractor valueExtractor, Func<T, bool> validator, string validationFailedMessage) : base(section, label, defaultValue, valueExtractor)
             {
                 this.validator = validator;
                 this.validationFailedMessage = validationFailedMessage;
@@ -204,6 +204,39 @@ namespace IngameScript
                     Debugger.Warn(GetIniKey().Name + " => " + (validationFailedMessage ?? "Validation Failed!"));
                     Debugger.Warn(GetIniKey().Name + " falling back to default (" + Value + ")");
                 }
+            }
+
+            /// <summary>
+            /// Creates a <see cref="bool"/> based State, that is also validated.
+            /// </summary>
+            /// <param name="label">The label of the state.</param>
+            /// <param name="defaultValue">The default value to use.</param>
+            /// <returns>New instance.</returns>
+            public static ValidatedTypedIniState<bool> OfBool(string section, string label, bool defaultValue, Func<bool, bool> validator, string validationFailedMessage)
+            {
+                return new ValidatedTypedIniState<bool>(section, label, defaultValue, BoolExtractor, validator, validationFailedMessage);
+            }
+
+            /// <summary>
+            /// Creates a <see cref="int"/> based State, that is also validated.
+            /// </summary>
+            /// <param name="label">The label of the state.</param>
+            /// <param name="defaultValue">The default value to use.</param>
+            /// <returns>New instance.</returns>
+            public static ValidatedTypedIniState<int> OfInt(string section, string label, int defaultValue, Func<int, bool> validator, string validationFailedMessage)
+            {
+                return new ValidatedTypedIniState<int>(section, label, defaultValue, IntExtractor, validator, validationFailedMessage);
+            }
+
+            /// <summary>
+            /// Creates a <see cref="string"/> based State, that is also validated.
+            /// </summary>
+            /// <param name="label">The label of the state.</param>
+            /// <param name="defaultValue">The default value to use.</param>
+            /// <returns>New instance.</returns>
+            public static ValidatedTypedIniState<string> OfString(string section, string label, string defaultValue, Func<string, bool> validator, string validationFailedMessage)
+            {
+                return new ValidatedTypedIniState<string>(section, label, defaultValue, StringExtractor, validator, validationFailedMessage);
             }
         }
     }

@@ -23,7 +23,8 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Contains the Configurable values of the Mining Platform
+        /// Contains the Configurable values of the Mining Platform.
+        /// Specifically built for usage with <see cref="PartialCustomDataIniStateManager"/>
         /// </summary>
         public class PlatformConfig
         {
@@ -32,7 +33,7 @@ namespace IngameScript
             /// <summary>
             /// The Main Idenitfier of the Mining Platform. Only blocks are considered for usage, that has this tag in their name.
             /// </summary>
-            public readonly TypedIniState<string> MainTag = TypedIniState<string>.OfString(DEFAULT_SECTION, "MAIN_TAG", "/Mine 01/", p => !string.IsNullOrEmpty(p), "Can't be empty!");
+            public readonly TypedIniState<string> MainTag = ValidatedTypedIniState<string>.OfString(DEFAULT_SECTION, "MAIN_TAG", "/Mine 01/", p => !string.IsNullOrEmpty(p), "Can't be empty!");
 
             /// <summary>
             /// Returns all configurable config fields as an Immutable Dictionary with the labels as Key

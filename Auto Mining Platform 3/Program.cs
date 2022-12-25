@@ -30,6 +30,9 @@ namespace IngameScript
         readonly PlatformConfig config;
         readonly IniStateManager configManager;
 
+        readonly PlatformState state;
+        readonly IniStateManager stateManager;
+
         bool indicator = false;
 
         public Program()
@@ -40,21 +43,34 @@ namespace IngameScript
 
             config = new PlatformConfig();
             configManager = new PartialCustomDataIniStateManager(SaveConfig, LoadConfig, config.StatesToImmutableDictionary());
+            configManager.SaveStates();//Save to make sure that the Custom Data is initialized
+            configManager.LoadStates();//Load To make sure that previously set config values are applied
+
+            state = new PlatformState();
+            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.StatesToArray());
+            stateManager.LoadStates();//Load the states, so any previous platform states are continued
 
             router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>>(){
                 { "test", p => Echo("Test") },
+                { "load", p => { configManager.LoadStates(); }},
+                { "start", p => 
+                { 
+                    runManager.Paused = false;
+                    runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
+                }},
+                { "stop", p =>
+                {
+                    runManager.Paused = false;
+                    runManager.ScheduleRunFrequency(UpdateFrequency.None);
+                }},
                 { "pause", p => { runManager.Paused = true; }},
-                { "start", p => { runManager.Paused = false; }},
-                { "load", p => { configManager.LoadStates(); }}
+                
             });
-
-            configManager.SaveStates();
-            configManager.LoadStates();
         }
 
         public void Save()
         {
-
+            stateManager.SaveStates();
         }
 
         public void Main(string argument, UpdateType updateSource)
