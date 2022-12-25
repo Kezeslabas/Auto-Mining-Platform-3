@@ -10,10 +10,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Config\PlatformConfig.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)PlatformRouter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Actions\PlatformAction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)State\PlatformState.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Actions\" />
     <Folder Include="$(MSBuildThisFileDirectory)State\" />
   </ItemGroup>
 </Project>

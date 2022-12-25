@@ -62,12 +62,19 @@ namespace IngameScript
                 MyIniParseResult result;
                 if (!_ini.TryParse(getStateString(), out result))
                 {
+                    Debugger.Error("Loading the config failed!");
+                    Debugger.Error(result.Error);
                     return result;
                 }
 
                 SetStates(_ini);
 
                 return result;
+            }
+
+            public void ResetHolder()
+            {
+                setStateString("");
             }
         }
 

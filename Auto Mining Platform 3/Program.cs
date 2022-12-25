@@ -47,34 +47,16 @@ namespace IngameScript
             configManager.LoadStates();//Load To make sure that previously set config values are applied
 
             state = new PlatformState();
-            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.StatesToArray());
+            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.AllStates());
             stateManager.LoadStates();//Load the states, so any previous platform states are continued
 
-            router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>>(){
-                { "test", p => Echo("Test") },
-                { "load", p => { configManager.LoadStates(); }},
-                { "start", p => 
-                {
-                    state.IsRunning.Value = true;
-                    runManager.Paused = false;
-                    runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
-                }},
-                { "stop", p =>
-                {
-                    state.IsRunning.Value = false;
-                    runManager.Paused = false;
-                    runManager.ScheduleRunFrequency(UpdateFrequency.None);
-                }},
-                { "pause", p => { runManager.Paused = true; }},
-                
+            router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>> {
+                { "set", new SetAction(configManager, stateManager, state).DoAction },
+                { "refresh", p => { return; } },
+                { "start", p => { return; } },
+                { "pause", p => { return; } },
+                { "reset", p => { return; } }
             });
-
-            Debugger.Debug("Prog: " + state.IsRunning.Value);
-            if (state.IsRunning.Value)
-            {
-                runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
-                runManager.ApplySchedule();
-            }
         }
 
         public void Save()
@@ -92,14 +74,13 @@ namespace IngameScript
 
             if (runManager.IsAutoRun())
             {
-                runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
+                //TODO
             }
             else
             {
                 router.ParseAndRoute(argument);
             }
 
-            Debugger.Debug(state.IsRunning.Value.ToString());
             runManager.ApplySchedule();
         }
 

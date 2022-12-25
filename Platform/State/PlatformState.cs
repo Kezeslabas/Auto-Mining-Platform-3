@@ -27,14 +27,27 @@ namespace IngameScript
         {
             public const string DEFAULT_SECTION = "PlatformState";
 
-            public TypedIniState<bool> IsRunning = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
+            private readonly IniState[] allStates;
 
-            public IniState[] StatesToArray()
+            public TypedIniState<bool> IsDig { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsDig", false);
+            public TypedIniState<bool> IsValidPlatform { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsValidPlatform", false);
+            public TypedIniState<bool> IsStartable { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsStartable", false);
+            public TypedIniState<bool> IsRunning { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
+
+            public PlatformState()
             {
-                return new IniState[]
+                allStates = new IniState[]
                 {
-                    IsRunning    
+                    IsDig,
+                    IsValidPlatform,
+                    IsStartable,
+                    IsRunning
                 };
+            }
+
+            public IniState[] AllStates()
+            {
+                return allStates;
             }
         }
     }

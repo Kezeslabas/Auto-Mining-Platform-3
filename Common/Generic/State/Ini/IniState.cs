@@ -42,7 +42,8 @@ namespace IngameScript
             /// Checks if this state is part of the provided <see cref="MyIni"/>.
             /// </summary>
             /// <param name="ini">The ini to check the state for.</param>
-            public abstract void ParseAndSet(MyIni ini);
+            /// <returns>If the state was changed, then true, otherwise false.</returns>
+            public abstract bool ParseAndSet(MyIni ini);
 
             /// <summary>
             /// Stringifies this state.
@@ -83,16 +84,31 @@ namespace IngameScript
             /// <returns></returns>
             public delegate bool StateValueExtractor(MyIniValue value, out T tempValue);
 
-            public T Value { get; set; }
+            public T Value { get; private set; }
             protected readonly T DefaultValue;
             private readonly StateValueExtractor valueExtractor;
-            
 
             protected TypedIniState(string section, string label, T defaultValue, StateValueExtractor valueExtractor) : base(section, label)
             {
                 DefaultValue = defaultValue;
                 Value = defaultValue;
                 this.valueExtractor = valueExtractor;
+            }
+
+            /// <summary>
+            /// Sets the Value of the State.
+            /// </summary>
+            /// <param name="val">The value to set</param>
+            /// <returns>If the state was changed, then true, otherwise false.</returns>
+            public bool Set(T val)
+            {
+                if (val == null ? Value == null : val.Equals(Value))
+                {
+                    return false;
+                }
+
+                Value = val;
+                return true;
             }
 
             /// <summary>
@@ -103,24 +119,24 @@ namespace IngameScript
             /// When the value can't be parsed from the ini, then a warning is logged.
             /// </summary>
             /// <param name="ini">The ini to check the state for.</param>
-            public override void ParseAndSet(MyIni ini)
+            /// <returns>If the state was changed, then true, otherwise false.</returns>
+            public override bool ParseAndSet(MyIni ini)
             {
                 MyIniValue myIniValue = ini.Get(iniKey);
 
                 if (myIniValue.IsEmpty)
                 {
-                    Value = DefaultValue;
-                    return;
+                    return Set(DefaultValue);
                 }
 
                 T temp;
                 if (!valueExtractor(myIniValue, out temp))
                 {
                     Debugger.Warn(iniKey.Name + " can't be parsed: " + myIniValue.ToString());
-                    return;
+                    return false;
                 }
 
-                Value = temp == null ? DefaultValue : temp;
+                return Set(temp == null ? DefaultValue : temp);
             }
 
             /// <summary>
@@ -194,16 +210,25 @@ namespace IngameScript
                 this.validationFailedMessage = validationFailedMessage;
             }
 
-            public override void ParseAndSet(MyIni ini)
+            /// <summary>
+            /// <inheritdoc/>
+            /// <para/>
+            /// Also validates the states using the provided valdiation schema.
+            /// </summary>
+            /// <param name="ini">The ini to check the state for.</param>
+            /// <returns>If the state was changed, then true, otherwise false.</returns>
+            public override bool ParseAndSet(MyIni ini)
             {
-                base.ParseAndSet(ini);
+                bool parseResult = base.ParseAndSet(ini);
 
                 if (validator != null && !validator.Invoke(Value))
                 {
-                    Value = DefaultValue;
                     Debugger.Warn(GetIniKey().Name + " => " + (validationFailedMessage ?? "Validation Failed!"));
-                    Debugger.Warn(GetIniKey().Name + " falling back to default (" + Value + ")");
+                    Debugger.Warn(GetIniKey().Name + " falling back to default (" + DefaultValue + ")");
+                    return Set(DefaultValue);
                 }
+
+                return parseResult;
             }
 
             /// <summary>
