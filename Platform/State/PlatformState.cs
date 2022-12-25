@@ -32,7 +32,7 @@ namespace IngameScript
             public TypedIniState<bool> IsDig { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsDig", false);
             public TypedIniState<bool> IsValidPlatform { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsValidPlatform", false);
             public TypedIniState<bool> IsStartable { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsStartable", false);
-            public TypedIniState<bool> IsRunning { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
+            public TypedIniState<bool> IsMining { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
 
             public PlatformState()
             {
@@ -41,7 +41,7 @@ namespace IngameScript
                     IsDig,
                     IsValidPlatform,
                     IsStartable,
-                    IsRunning
+                    IsMining
                 };
             }
 

@@ -27,6 +27,9 @@ namespace IngameScript
             void DoAction(MyCommandLine cl);
         }
 
+        /// <summary>
+        /// Initializes the Platform and sets it to a starting position.
+        /// </summary>
         public class SetAction : IPlatformAction
         {
             private readonly IniStateManager configManager;
@@ -43,6 +46,24 @@ namespace IngameScript
                 this.state = state;
             }
 
+            /// <summary>
+            /// Resets all states in the platform, and loads the config. (If config can't be loaded, then exits.)
+            /// <para/>
+            /// TODO Work In Progress
+            /// <para/>
+            /// Uses the provided command line to parse additional arguments and flags.
+            /// <para/>
+            /// Arguments:
+            /// <list type="bullet">
+            ///     <item>arg[1] Optional. After the Set, the platform will be aligned to the provided step number.</item>
+            /// </list>
+            /// Flags:
+            /// <list type="bullet">
+            ///     <item>-m Interprets arg[1] as depth in meters, then finds and applies the appropriate stepNumber for that depth.</item>
+            ///     <item>-dig Instructs the platform to setup for a digging instead of mining.</item>
+            /// </list>
+            /// </summary>
+            /// <param name="cl">command line that parsed the main argument</param>
             public void DoAction(MyCommandLine cl)
             {
                 stateManager.ResetHolder();
@@ -70,11 +91,11 @@ namespace IngameScript
 
                     if (cl.Switch(METER_FLAG))
                     {
-                        //Find and Set StepNumber for Meter
+                        //TODO Find and Set StepNumber for Meter
                     }
                 }
 
-                //Set Platform To Step
+                //TODO Set Platform To Step
 
                 stateManager.SaveStates();
             }
