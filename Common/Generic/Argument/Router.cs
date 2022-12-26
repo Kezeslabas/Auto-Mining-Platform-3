@@ -37,7 +37,7 @@ namespace IngameScript
             /// New Router Instance.
             /// </summary>
             /// <param name="notification">Action to use to notify the user about argument errors.</param>
-            /// <param name="routes">Routes to use</param>
+            /// <param name="routes">Routes to use.</param>
             public Router(Action<string> notification, Dictionary<string, Action<MyCommandLine>> routes)
             {
                 this.notification = notification;
@@ -47,7 +47,8 @@ namespace IngameScript
             /// <summary>
             /// Parse the provided argument and find the corresponding route.
             /// </summary>
-            /// <param name="argument">If the arguement was succesfully parsed, and a route was found, then true, otherwise false.</param>
+            /// <param name="argument">The argument to parse</param>
+            /// <returns>If the arguement was succesfully parsed, and a route was found, then true, otherwise false.</returns>
             public bool ParseAndRoute(string argument)
             {
                 Debugger.Debug("Arg: " + argument);

@@ -23,37 +23,34 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// The Action that should be taken when the "start" command is used.
+        /// The Action that should be taken when the "reset" command is used.
         /// </summary>
-        public class StartAtion : IPlatformAction
+        public class ResetAction : IPlatformAction
         {
-            private readonly PlatformState state;
+            private readonly IniStateManager configManager;
+            private readonly IniStateManager stateManager;
             private readonly PlatformRunner platformRunner;
 
-            public StartAtion(PlatformState state, PlatformRunner platformRunner)
+            public ResetAction(IniStateManager configManager, IniStateManager stateManager, PlatformRunner platformRunner)
             {
-                this.state = state;
+                this.configManager = configManager;
+                this.stateManager = stateManager;
                 this.platformRunner = platformRunner;
             }
 
             /// <summary>
-            /// If the Platform is ready to be started, then it starts the mining sequence and the atutomatic running.
-            /// When a mining is already in progress, then just restarts the running.
+            /// Stops the Platform compeltely, resets all states and clears the config.
             /// </summary>
             /// <param name="cl">Command Line to get extra argument from.</param>
             public void DoAction(MyCommandLine cl)
             {
-                if (!state.IsValidPlatform.Value)
-                {
-                    Debugger.Error("Platform is Not Valid!");
-                    return;
-                }
+                platformRunner.StopPlatform();//Stop any progress
 
-                //TODO Start Mining Components
+                stateManager.ResetHolder();//Reset All states
+                stateManager.LoadStates();
 
-                state.IsMining.Set(true);
-
-                platformRunner.StartPlatform();
+                configManager.ResetHolder();//Reset Custom Data
+                configManager.SaveStates();
             }
         }
     }

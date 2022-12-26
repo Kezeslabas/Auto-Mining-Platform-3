@@ -22,15 +22,25 @@ namespace IngameScript
 {
     partial class Program
     {
-        public abstract class StateContext
+        /// <summary>
+        /// A simple Context that can register updates, and reset it's state upon consuming the update.
+        /// </summary>
+        public class StateContext
         {
             private bool wasUpdated = false;
 
-            public void RegisterUpdate()
+            /// <summary>
+            /// Updates the internal state to signals that there was an update for the context.
+            /// </summary>
+            public void Update()
             {
                 wasUpdated = true;
             }
 
+            /// <summary>
+            /// Checks if there was an update to the context, then resets it.
+            /// </summary>
+            /// <returns>True if there was an update, false otherwise.</returns>
             public bool ConsumeUpdates()
             {
                 if (!wasUpdated)

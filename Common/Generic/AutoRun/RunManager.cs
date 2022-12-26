@@ -6,8 +6,7 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Gives access to check for the currently active frequencies,
-        /// and to shedule a new frequency.
+        /// Gives access to frequency checkers and frequency scheduling.
         /// </summary>
         public interface IRunScheduler
         {
@@ -43,6 +42,9 @@ namespace IngameScript
         /// as <see cref="UpdateFrequency"/>, and it can be applied to the PB 
         /// if <see cref="ApplySchedule"/> is called at the end of the main method.
         /// <para/>
+        /// This Manager is made to be safe, so it stops the running with each iteration, 
+        /// unless instructed otherwise with a new schedule.
+        /// <para/>
         /// As of now, during an automatic run, only one <see cref="UpdateType"/> 
         /// is passed to the PB by the game, and it's always represent's the highest frequency.
         /// This is handled internally by this class. 
@@ -71,7 +73,7 @@ namespace IngameScript
 
             /// <summary>
             /// By setting this flag the automatic running can be disabled/enabled.
-            /// The previously scheduled frequencies are not lost.
+            /// The previously scheduled frequencies are kept.
             /// </summary>
             public bool Paused { get; set; } = false;
 

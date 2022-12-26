@@ -31,7 +31,9 @@ namespace IngameScript
         readonly IniStateManager configManager;
 
         readonly PlatformState state;
-        readonly IniStateManager stateManager;
+        readonly AllStateIniStateManager stateManager;
+
+        readonly PlatformRunner platformRunner;
 
         readonly StepManager stepManager;
 
@@ -46,21 +48,32 @@ namespace IngameScript
             config = new PlatformConfig();
             configManager = new PartialCustomDataIniStateManager(SaveConfig, LoadConfig, config.StatesToImmutableDictionary());
             configManager.SaveStates();//Save to make sure that the Custom Data is initialized
-            configManager.LoadStates();//Load To make sure that previously set config values are applied
+            configManager.LoadStates();//Load to make sure that previously set config values are applied
 
             state = new PlatformState();
-            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.AllStates(), state);
+            
+            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.AllStates());
+
             stateManager.LoadStates();//Load the states, so any previous platform states are continued
 
-            stepManager = new StepManager();
+            platformRunner = new PlatformRunner(runManager, state, config);
+
+            stepManager = new StepManager(state);
+
+            Echo("---After Step Manager Init");
+            Debugger.Debug("States: \n" + state.AllStates().Select(p => p.GetIniKey().Name + "=" + p.ToString()).Aggregate((p, k) => string.Join("\n", p, k)));
 
             router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>> {
-                { "set", new SetAction(configManager, stateManager, state, stepManager).DoAction },
+                { "set", new SetAction(configManager, stateManager, state, platformRunner, stepManager).DoAction },
                 { "refresh", p => { return; } },
-                { "start", p => { return; } },
-                { "pause", p => { return; } },
-                { "reset", p => { return; } }
+                { "start", new StartAtion(state, platformRunner).DoAction },
+                { "pause", new PauseAction(platformRunner).DoAction },
+                { "reset", new ResetAction(configManager, stateManager, platformRunner).DoAction }
             });
+
+            //TODO Apply States
+
+            stateManager.UpdateStates();
         }
 
         public void Save()
@@ -74,18 +87,32 @@ namespace IngameScript
             Echo(indicator ? "[/-/-/-]" : "[-/-/-/]");
             indicator = !indicator;
 
-            runManager.AnalyzeUpdateType(updateSource);
-
-            if (runManager.IsAutoRun())
+            if (platformRunner.IsAutoRun(updateSource))
             {
-                //TODO
+                //TEMP Step Controller
+                stepManager.NextStep();
+                if (stepManager.IsFinalStep())
+                {
+                    platformRunner.StopPlatform();
+                }
+                //---
             }
             else
             {
                 router.ParseAndRoute(argument);
             }
 
-            runManager.ApplySchedule();
+            Echo("---");
+            Debugger.Debug("States: \n" + state.AllStates().Select(p => p.GetIniKey().Name + "=" + p.ToString()).Aggregate((p, k) => string.Join("\n", p, k)));
+            Echo("---");
+            Debugger.Debug("Step: " + stepManager.CurrentStep);
+            Debugger.Debug("StepNumber: " + stepManager.CurrentStepNumber);
+            Debugger.Debug("MaxStep: " + stepManager.MaxSteps);
+            Debugger.Debug("Final: " + stepManager.IsFinalStep());
+            Echo("---");
+
+            stateManager.UpdateStates();
+            platformRunner.Apply();
         }
 
         public void SaveConfig(string customData) => Me.CustomData = customData;

@@ -41,9 +41,9 @@ namespace IngameScript
             /// Returns all configurable config fields as an Immutable Dictionary with the labels as Key
             /// </summary>
             /// <returns></returns>
-            public ImmutableDictionary<MyIniKey, IniState> StatesToImmutableDictionary()
+            public ImmutableDictionary<MyIniKey, ContextedIniState> StatesToImmutableDictionary()
             {
-                return new IniState[] 
+                return new ContextedIniState[] 
                 { 
                     MainTag
 

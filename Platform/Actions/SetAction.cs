@@ -23,24 +23,26 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// Initializes the Platform and sets it to a starting position.
+        /// The Action that should be taken when the "set" command is used.
         /// </summary>
         public class SetAction : IPlatformAction
         {
             private readonly IniStateManager configManager;
             private readonly IniStateManager stateManager;
             private readonly PlatformState state;
+            private readonly PlatformRunner platformRunner;
 
             private readonly StepManager stepManager;
 
             private const string DIG_FLAG = "dig";
             private const string METER_FLAG = "m";
 
-            public SetAction(IniStateManager configManager, IniStateManager stateManager, PlatformState state, StepManager stepManager)
+            public SetAction(IniStateManager configManager, IniStateManager stateManager, PlatformState state, PlatformRunner platformRunner, StepManager stepManager)
             {
                 this.configManager = configManager;
                 this.stateManager = stateManager;
                 this.state = state;
+                this.platformRunner = platformRunner;
                 this.stepManager = stepManager;
             }
 
@@ -61,10 +63,12 @@ namespace IngameScript
             ///     <item>-dig Instructs the platform to setup for a digging instead of mining.</item>
             /// </list>
             /// </summary>
-            /// <param name="cl">command line that parsed the main argument</param>
+            /// <param name="cl">Command Line to get extra argument from.</param>
             public void DoAction(MyCommandLine cl)
             {
-                stateManager.ResetHolder();
+                platformRunner.StopPlatform();//Stop any progress
+
+                stateManager.ResetHolder();//Reset All states
                 stateManager.LoadStates();
 
                 if (!configManager.LoadStates().Success)

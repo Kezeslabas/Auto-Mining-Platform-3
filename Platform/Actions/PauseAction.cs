@@ -23,11 +23,25 @@ namespace IngameScript
     partial class Program
     {
         /// <summary>
-        /// The <see cref="DoAction(MyCommandLine)"/> method has the signature that is accepted for actions in a <see cref="Router"/>.
+        /// The Action that should be taken when the "pause" command is used.
         /// </summary>
-        public interface IPlatformAction
+        public class PauseAction : IPlatformAction
         {
-            void DoAction(MyCommandLine cl);
+            private readonly PlatformRunner platformRunner;
+
+            public PauseAction(PlatformRunner platformRunner)
+            {
+                this.platformRunner = platformRunner;
+            }
+
+            /// <summary>
+            /// Pauses the Automatic Running.
+            /// </summary>
+            /// <param name="cl">Command Line to get extra argument from.</param>
+            public void DoAction(MyCommandLine cl)
+            {
+                platformRunner.Pause();
+            }
         }
     }
 }
