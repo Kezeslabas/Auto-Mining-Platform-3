@@ -86,6 +86,7 @@ namespace IngameScript
         public class AllStateIniStateManager : IniStateManager
         {
             protected readonly IniState[] states;
+            protected readonly StateContext context;
 
             /// <summary>
             /// Makes a new State Manager with the initial states.
@@ -93,9 +94,12 @@ namespace IngameScript
             /// <param name="setStateString">Method that updates the state holder.</param>
             /// <param name="getStateString">Method that loads the current state from the holder.</param>
             /// <param name="states">The array of states that should be handled.</param>
-            public AllStateIniStateManager(Action<string> setStateString, Func<string> getStateString, IniState[] states) : base(setStateString, getStateString)
+            public AllStateIniStateManager(Action<string> setStateString, Func<string> getStateString, IniState[] states, StateContext context) : base(setStateString, getStateString)
             {
                 this.states = states;
+                this.context = context;
+
+                Array.ForEach(states, p => p.SetContext(context));
             }
 
             /// <summary>
@@ -108,6 +112,13 @@ namespace IngameScript
                 setStateString(_ini.ToString());
             }
 
+            public void UpdateStates()
+            {
+                if (context.ConsumeUpdates())
+                {
+                    SaveStates();
+                }
+            }
 
 
             /// <summary>

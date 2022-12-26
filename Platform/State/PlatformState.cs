@@ -23,16 +23,26 @@ namespace IngameScript
     partial class Program
     { 
 
-        public class PlatformState
+        public class PlatformState : StateContext
         {
             public const string DEFAULT_SECTION = "PlatformState";
 
             private readonly IniState[] allStates;
 
+            /// <summary>
+            /// Indicates if the Mining Sequence is a digging or a mining.
+            /// </summary>
             public TypedIniState<bool> IsDig { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsDig", false);
+
+            /// <summary>
+            /// Indicates if the detected blocks create a valid mining platform.
+            /// </summary>
             public TypedIniState<bool> IsValidPlatform { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsValidPlatform", false);
-            public TypedIniState<bool> IsStartable { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsStartable", false);
-            public TypedIniState<bool> IsMining { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
+
+            /// <summary>
+            /// Indicates if a mining is In Progress at the moment and the platform should be running or not.
+            /// </summary>
+            public TypedIniState<bool> IsRunning { get; private set; } = TypedIniState<bool>.OfBool(DEFAULT_SECTION, "IsRunning", false);
 
             public PlatformState()
             {
@@ -40,8 +50,7 @@ namespace IngameScript
                 {
                     IsDig,
                     IsValidPlatform,
-                    IsStartable,
-                    IsMining
+                    IsRunning
                 };
             }
 

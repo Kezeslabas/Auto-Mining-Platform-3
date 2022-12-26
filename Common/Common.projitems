@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Generic\Argument\Router.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\AutoRun\RunManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\Debug\Debugger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Generic\State\StateContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\State\Indexed\Experimental\IndexStateManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\State\Ini\IniState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Generic\State\Ini\IniStateManager.cs" />

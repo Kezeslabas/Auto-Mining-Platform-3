@@ -31,6 +31,8 @@ namespace IngameScript
         {
             public static readonly string DEFAULT_SECTION = "X";
 
+            protected StateContext context;
+
             protected readonly MyIniKey iniKey;
 
             public MyIniKey GetIniKey()
@@ -59,6 +61,23 @@ namespace IngameScript
             public IniState(string section, string label)
             {
                 iniKey = new MyIniKey(section, label);
+            }
+
+            /// <summary>
+            /// Sets the context for the State.
+            /// <para/>
+            /// The context may only be set once, and any subsequencts attempts will not update the context.
+            /// </summary>
+            /// <param name="context"></param>
+            public void SetContext(StateContext context)
+            {
+                if (this.context != null)
+                {
+                    Debugger.Debug("Context already Set! (" + GetIniKey().Name + ")");
+                    return;
+                }
+
+                this.context = context;
             }
         }
 
@@ -108,6 +127,7 @@ namespace IngameScript
                 }
 
                 Value = val;
+                context?.RegisterUpdate();
                 return true;
             }
 

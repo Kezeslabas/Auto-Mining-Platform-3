@@ -22,9 +22,20 @@ namespace IngameScript
 {
     partial class Program
     {
-        public interface IPlatformAction
+        public class StartAtion : IPlatformAction
         {
-            void DoAction(MyCommandLine cl);
+            private readonly PlatformState state;
+
+            public void DoAction(MyCommandLine cl)
+            {
+                if (!state.IsValidPlatform.Value)
+                {
+                    Debugger.Error("Platform is Not Valid!");
+                    return;
+                }
+
+                state.IsRunning.Set(true);
+            }
         }
     }
 }

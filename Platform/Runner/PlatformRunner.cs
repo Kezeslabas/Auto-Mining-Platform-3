@@ -22,9 +22,26 @@ namespace IngameScript
 {
     partial class Program
     {
-        public interface IPlatformAction
+        public class PlatformRunner
         {
-            void DoAction(MyCommandLine cl);
+            private readonly RunManager runManager;
+            private readonly PlatformState platformState;
+
+            public void StartPlatform()
+            {
+                platformState.IsRunning.Set(true);
+                runManager.ScheduleRunFrequency(UpdateFrequency.Update100);
+            }
+
+            public void PauseMining()
+            {
+
+            }
+
+            public void StopPlatform()
+            {
+                platformState.IsRunning.Set(false);
+            }
         }
     }
 }

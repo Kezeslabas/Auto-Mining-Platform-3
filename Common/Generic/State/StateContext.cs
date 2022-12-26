@@ -22,9 +22,25 @@ namespace IngameScript
 {
     partial class Program
     {
-        public interface IPlatformAction
+        public abstract class StateContext
         {
-            void DoAction(MyCommandLine cl);
+            private bool wasUpdated = false;
+
+            public void RegisterUpdate()
+            {
+                wasUpdated = true;
+            }
+
+            public bool ConsumeUpdates()
+            {
+                if (!wasUpdated)
+                {
+                    return false;
+                }
+
+                wasUpdated = false;
+                return true;
+            }
         }
     }
 }

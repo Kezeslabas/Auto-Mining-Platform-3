@@ -30,6 +30,8 @@ namespace IngameScript
         {
             private const string DEFAULT_SECTION = PartialCustomDataIniStateManager.DEFAULT_SECTION;
 
+            public readonly UpdateFrequency DEFAULT_UPDATE_FREQUENCY = UpdateFrequency.Update100;
+
             /// <summary>
             /// The Main Idenitfier of the Mining Platform. Only blocks are considered for usage, that has this tag in their name.
             /// </summary>

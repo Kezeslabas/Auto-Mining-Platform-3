@@ -33,6 +33,8 @@ namespace IngameScript
         readonly PlatformState state;
         readonly IniStateManager stateManager;
 
+        readonly StepManager stepManager;
+
         bool indicator = false;
 
         public Program()
@@ -47,11 +49,13 @@ namespace IngameScript
             configManager.LoadStates();//Load To make sure that previously set config values are applied
 
             state = new PlatformState();
-            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.AllStates());
+            stateManager = new AllStateIniStateManager(SaveToStorage, LoadFromStorage, state.AllStates(), state);
             stateManager.LoadStates();//Load the states, so any previous platform states are continued
 
+            stepManager = new StepManager();
+
             router = new Router(Echo, new Dictionary<string, Action<MyCommandLine>> {
-                { "set", new SetAction(configManager, stateManager, state).DoAction },
+                { "set", new SetAction(configManager, stateManager, state, stepManager).DoAction },
                 { "refresh", p => { return; } },
                 { "start", p => { return; } },
                 { "pause", p => { return; } },
